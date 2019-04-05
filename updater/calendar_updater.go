@@ -7,6 +7,7 @@ import (
 	"github.com/davegarred/wh3/persist"
 	"github.com/davegarred/wh3/reader"
 	"io/ioutil"
+	"log"
 )
 
 func HandleRequest(_ context.Context, _ interface{}) (interface{}, error) {
@@ -49,6 +50,7 @@ func pullEvents() ([]*dto.GoogleCalendar, error) {
 }
 
 func persistEvents(events []*dto.GoogleCalendar) error {
+	log.Printf("found and persisting %d events", len(events))
 	return persist.Put(events)
 }
 

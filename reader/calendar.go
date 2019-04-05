@@ -28,7 +28,7 @@ func NewCalendarReader(configFile []byte) (*CalendarReader, error){
 }
 func (r *CalendarReader) Events() (*calendar.Events, error) {
 	minTime := time.Now().Format(time.RFC3339)
-	maxTime := time.Now().Add(2 * 24 * 30 * time.Hour).Format(time.RFC3339)
+	maxTime := time.Now().Add(3 * 24 * 30 * time.Hour).Format(time.RFC3339)
 	events,err := r.svc.Events.List(seaH3Cal).ShowDeleted(false).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).OrderBy("startTime").Do()
 	if err != nil {
 		return nil, err
