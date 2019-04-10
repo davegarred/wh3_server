@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func _TestHandleRequest(t *testing.T) {
+func TestHandleRequest(t *testing.T) {
 	res,_ := HandleRequest(context.Background(), events.APIGatewayProxyRequest{})
 	val,_ := json.Marshal(res)
 	fmt.Println(string(val))

@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	dynamoTable = "wh3_google_calendar"
+	kennelTable = "wh3_google_calendar"
+	eventTable = "wh3_kennel"
 	primaryKey  = "googleId"
 	dateIndex   = "eventDate"
 	payload     = "payload"
@@ -29,7 +30,7 @@ func Get(key string) (*string, error) {
 				S: aws.String(key),
 			},
 		},
-		TableName: aws.String(dynamoTable),
+		TableName: aws.String(kennelTable),
 	})
 	if err != nil {
 		return nil, err
@@ -41,7 +42,7 @@ func Get(key string) (*string, error) {
 	return event, nil
 }
 
-func Search() ([]*dto.GoogleCalendar, error) {
+func AllEvents() ([]*dto.GoogleCalendar, error) {
 	svc, err := client()
 	if err != nil {
 		return nil, err
@@ -66,6 +67,31 @@ func Search() ([]*dto.GoogleCalendar, error) {
 	return result, nil
 }
 
+func AllKennels() ([]*dto.Kennel, error) {
+	svc, err := client()
+	if err != nil {
+		return nil, err
+	}
+
+	scanOutput, err := svc.Scan(allKennels())
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*dto.Kennel, 0, len(scanOutput.Items))
+	for _, item := range scanOutput.Items {
+		serEvent := item[payload].S
+		event := &dto.Kennel{}
+		err := json.Unmarshal([]byte(*serEvent), event)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, event)
+	}
+
+	return result, nil
+}
+
 func eventsAfterToday() *dynamodb.ScanInput {
 	start := time.Now()
 	return &dynamodb.ScanInput{
@@ -79,7 +105,14 @@ func eventsAfterToday() *dynamodb.ScanInput {
 		},
 		FilterExpression:     aws.String("#d >= :start"),
 		ProjectionExpression: aws.String(payload),
-		TableName:            aws.String(dynamoTable),
+		TableName:            aws.String(kennelTable),
+	}
+}
+
+func allKennels() *dynamodb.ScanInput {
+	return &dynamodb.ScanInput{
+		ProjectionExpression: aws.String(payload),
+		TableName:            aws.String(eventTable),
 	}
 }
 
@@ -104,7 +137,7 @@ func Put(events []*dto.GoogleCalendar) error {
 				payload: &dynamodb.AttributeValue{
 					S: aws.String(string(ser)),
 				}},
-			TableName: aws.String(dynamoTable),
+			TableName: aws.String(kennelTable),
 		})
 		if err != nil {
 			return err
