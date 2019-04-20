@@ -33,12 +33,20 @@ type Response struct {
 	Kennels []*Kennel    `json:"kennels"`
 }
 
-func ConvertAndWrap(events []*GoogleCalendar, kennels []*Kennel) *Response {
-	hashEvents := make([]*HashEvent, 0, len(events))
-	for _, event := range events {
+func ConvertAndWrap(wh3Events []*GoogleCalendar, hswtfEvents []*GoogleCalendar, kennels []*Kennel) *Response {
+	hashEvents := make([]*HashEvent, 0, len(wh3Events))
+	for _, event := range wh3Events {
 		hashEvent, err := ConvertGoogleCal(event)
 		if err != nil {
 			log.Printf("error converting event '%s' from google calendar: %v", event.Id, err)
+			continue
+		}
+		hashEvents = append(hashEvents, hashEvent)
+	}
+	for _, event := range hswtfEvents {
+		hashEvent, err := ConvertGoogleCalForHSWTF(event)
+		if err != nil {
+			log.Printf("error converting HSWTF event '%s' from google calendar: %v", event.Id, err)
 			continue
 		}
 		hashEvents = append(hashEvents, hashEvent)

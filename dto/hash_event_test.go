@@ -10,9 +10,10 @@ func TestParseEventName(t *testing.T) {
 	expect(t, HAPPY_HOUR, "Seattle H3 Hashy Hour", "", "Seattle H3 Hashy Hour");
 	expect(t, SEATTLE, "SH3 RDR 2016 Planning Meeting", "", "SH3 RDR 2016 Planning Meeting");
 	expect(t, SEATTLE, "Hashmas", "756", "SH3 #756 (Hashmas)");
+	expect(t, SEATTLE, "SH3", "", "SH3 #? (TBD)");
 	expect(t, PUGET_SOUND, "Christmas Run #35, with a touch of absinthe", "941", "PSH3 #941 (Christmas Run #35, with a touch of absinthe)");
-	expect(t, SEAMON, "SeaMon H3 #?", "", "SeaMon H3 #? (TBD)");
-	expect(t, NO_BALLS, "NBH3 #?", "", "NBH3 #? (TBD)");
+	expect(t, SEAMON, "SeaMon H3", "", "SeaMon H3 #? (TBD)");
+	expect(t, NO_BALLS, "NBH3", "", "NBH3 #? (TBD)");
 	expect(t, HSWTF, "3rd Anal Staph Infection run", "115", "HSWTFH3 #115 (3rd Anal Staph Infection run)");
 	expect(t, RENTON_HAPPY_HOUR, "South End H3 Happy Hour?", "", "South End H3 Happy Hour?");
 	expect(t, SOUTH_SOUND, "XXX-mas", "144", "SSH3 #144 (XXX-mas)");
@@ -56,6 +57,6 @@ func verifyHare(t *testing.T, s string) {
 }
 
 func TestTmp(t *testing.T) {
-	val := "{\n  \"id\": \"NO_BALLS\",\n  \"name\": \"No Balls H3\",\n  \"hareraiserName\": \"Panty Ho\",\n  \"hareraiserEmail\": \"rebabeauty@gmail.com\",\n  \"firstHash\": \"1989-03-31\",\n  \"founders\": \"Linda 'Down Down' Sholand, Linda 'Hopalong' Youngs, Sherry 'Captain Crash' Picatti, Patti 'Hardcore' Jensen\",\n  \"lineage\": \"Puget Sound H3\",\n  \"badges\": [\n    \"WALKER_FRIENDLY\"\n  ]\n}"
+	val := "{\n  \"id\": \"SS_SHITSHOW\",\n  \"name\": \"South Sound Shitshow\",\n  \"hareraiserName\": \"\",\n  \"hareraiserEmail\": \"\",\n  \"badges\": [],\n  \"firstHash\": \"\",\n  \"founders\": \"\",\n  \"lineage\": \"\"\n}"
 	fmt.Println(val)
 }

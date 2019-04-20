@@ -9,7 +9,7 @@ import (
 )
 
 func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Response, error) {
-	events, err := persist.AllEvents()
+	wh3Events, hswtfEvents, err := persist.AllEvents()
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Res
 		return nil, err
 	}
 
-	return dto.ConvertAndWrap(events, kennels), nil
+	return dto.ConvertAndWrap(wh3Events, hswtfEvents, kennels), nil
 }
 
 func main() {

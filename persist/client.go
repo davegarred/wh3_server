@@ -15,6 +15,7 @@ const (
 	eventTable = "wh3_kennel"
 	primaryKey  = "googleId"
 	dateIndex   = "eventDate"
+	calendarField   = "calendar"
 	payload     = "payload"
 )
 
@@ -42,29 +43,35 @@ func Get(key string) (*string, error) {
 	return event, nil
 }
 
-func AllEvents() ([]*dto.GoogleCalendar, error) {
+func AllEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 	svc, err := client()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	scanOutput, err := svc.Scan(eventsAfterToday())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	result := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
+	wh3Events := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
+	hswtfEvents := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
 	for _, item := range scanOutput.Items {
+		calendar := item[calendarField].S
 		serEvent := item[payload].S
 		event := &dto.GoogleCalendar{}
 		err := json.Unmarshal([]byte(*serEvent), event)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		result = append(result, event)
+		if "wh3" == *calendar {
+			wh3Events = append(wh3Events, event)
+		} else if "hswtf" == *calendar {
+			hswtfEvents = append(hswtfEvents, event)
+		}
 	}
 
-	return result, nil
+	return wh3Events, hswtfEvents, nil
 }
 
 func AllKennels() ([]*dto.Kennel, error) {
@@ -104,7 +111,7 @@ func eventsAfterToday() *dynamodb.ScanInput {
 			},
 		},
 		FilterExpression:     aws.String("#d >= :start"),
-		ProjectionExpression: aws.String(payload),
+		//ProjectionExpression: aws.String(payload),
 		TableName:            aws.String(kennelTable),
 	}
 }
@@ -116,7 +123,7 @@ func allKennels() *dynamodb.ScanInput {
 	}
 }
 
-func Put(events []*dto.GoogleCalendar) error {
+func Put(calendar string, events []*dto.GoogleCalendar) error {
 	svc, err := client()
 	if err != nil {
 		return err
@@ -133,6 +140,9 @@ func Put(events []*dto.GoogleCalendar) error {
 				},
 				dateIndex: &dynamodb.AttributeValue{
 					S: aws.String(event.EventDate()),
+				},
+				calendarField: &dynamodb.AttributeValue{
+					S: aws.String(calendar),
 				},
 				payload: &dynamodb.AttributeValue{
 					S: aws.String(string(ser)),

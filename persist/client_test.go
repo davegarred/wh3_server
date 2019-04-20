@@ -15,17 +15,17 @@ func TestGet(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	events,err := AllEvents()
+	wh3Events, _,err := AllEvents()
 	if err != nil {
 		panic(err)
 	}
-	for _,event := range events {
+	for _,event := range wh3Events {
 		fmt.Println(event.Date)
 	}
 }
 
 func TestPut(t *testing.T) {
-	err := Put([]*dto.GoogleCalendar{
+	err := Put("test", []*dto.GoogleCalendar{
 		{
 			Id:          "test-id",
 			Date:        "2019-04-05",

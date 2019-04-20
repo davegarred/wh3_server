@@ -21,7 +21,8 @@ func TestCal(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	events, err := client.Events()
+	events, err := client.HSWTFEvents()
+	//events, err := client.WH3Events()
 	if err != nil {
 		panic(err)
 	}

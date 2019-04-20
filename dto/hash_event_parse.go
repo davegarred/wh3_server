@@ -39,6 +39,37 @@ func ConvertGoogleCal(cal *GoogleCalendar) (*HashEvent, error) {
 
 	return event, nil
 }
+func ConvertGoogleCalForHSWTF(cal *GoogleCalendar) (*HashEvent, error) {
+	if cal.Date == "" && cal.DateTime == "" {
+		return nil, errors.New("no acceptable date found")
+	}
+	date := cal.Date
+	if date == "" {
+		rfcTime, err := time.Parse(time.RFC3339, cal.DateTime)
+		if err != nil {
+			return nil, errors.New("no acceptable date found")
+		}
+		date = rfcTime.Format("2006-01-02")
+	}
+	eventName := cal.Summary;
+	kennel := HSWTF;
+	eventNumber := ""
+	hare := ""
+
+	event := &HashEvent{
+		GoogleId:    cal.Id,
+		Date:        date,
+		DateTime:    cal.DateTime,
+		EventNumber: eventNumber,
+		Hare:        hare,
+		EventName:   eventName,
+		Description: cal.Description,
+		MapLink:     cal.EventLocation(),
+		Kennel:      kennel,
+	}
+
+	return event, nil
+}
 
 const (
 	TBD                       = "TBD"
@@ -63,14 +94,18 @@ func parseEventName(summary string) string {
 	unknownTitle := unknownTitleRegex.MatchString(summary)
 	if unknownTitle {
 		pos := unknownTitleRegex.FindStringIndex(summary)[0]
-		return summary[:pos-1]
+		return stripUnknownEventNumber(summary[:pos-1])
 	}
 	matchesTitlePattern := titleRegex.MatchString(summary)
 	if matchesTitlePattern {
 		enclosedTitle := titleRegex.FindString(summary)
 		return enclosedTitle[1 : len(enclosedTitle)-1]
 	}
-	return summary
+	return stripUnknownEventNumber(summary);
+}
+
+func stripUnknownEventNumber(summaryWithoutTitle string) string {
+	return strings.Replace(summaryWithoutTitle, " #?", "", 1)
 }
 
 func guessKennel(summary string) KennelId {
