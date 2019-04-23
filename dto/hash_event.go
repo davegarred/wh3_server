@@ -33,15 +33,15 @@ type Response struct {
 	Kennels []*Kennel    `json:"kennels"`
 }
 
-func ConvertAndWrap(wh3Events []*GoogleCalendar, hswtfEvents []*GoogleCalendar, kennels []*Kennel) *Response {
-	hashEvents := make([]*HashEvent, 0, len(wh3Events))
+func ConvertCalendarEvents(wh3Events []*GoogleCalendar, hswtfEvents []*GoogleCalendar) map[string]*HashEvent {
+	hashEventMap := make(map[string]*HashEvent)
 	for _, event := range wh3Events {
 		hashEvent, err := ConvertGoogleCal(event)
 		if err != nil {
 			log.Printf("error converting event '%s' from google calendar: %v", event.Id, err)
 			continue
 		}
-		hashEvents = append(hashEvents, hashEvent)
+		hashEventMap[hashEvent.GoogleId] = hashEvent
 	}
 	for _, event := range hswtfEvents {
 		hashEvent, err := ConvertGoogleCalForHSWTF(event)
@@ -49,12 +49,49 @@ func ConvertAndWrap(wh3Events []*GoogleCalendar, hswtfEvents []*GoogleCalendar, 
 			log.Printf("error converting HSWTF event '%s' from google calendar: %v", event.Id, err)
 			continue
 		}
-		hashEvents = append(hashEvents, hashEvent)
+		hashEventMap[hashEvent.GoogleId] = hashEvent
 	}
-	sort.Slice(hashEvents, func(i int, j int) bool {
-		return hashEvents[i].Date < hashEvents[j].Date
+	return hashEventMap
+}
+
+func ProcessAndWrap(calendarEvents map[string]*HashEvent, adminEvents map[string]*HashEvent, kennels []*Kennel) *Response {
+	for _,e := range adminEvents {
+		event := calendarEvents[e.GoogleId]
+		if event == nil {
+			continue
+		}
+		if len(e.DateTime) > 0 {
+			event.DateTime = e.DateTime
+		}
+		if len(e.EventName) > 0 {
+			event.EventName = e.EventName
+		}
+		if len(e.EventNumber) > 0 {
+			event.EventNumber = e.EventNumber
+		}
+		if len(e.Description) > 0 {
+			event.Description= e.Description
+		}
+		if len(e.MapLink) > 0 {
+			event.MapLink= e.MapLink
+		}
+		if len(e.Kennel) > 0 {
+			event.Kennel= e.Kennel
+		}
+		if len(e.Hare) > 0 {
+			event.Hare = e.Hare
+		}
+		calendarEvents[event.GoogleId] = event
+	}
+
+	sortedEvents := make([]*HashEvent, 0, len(calendarEvents))
+	for _,e := range calendarEvents {
+		sortedEvents = append(sortedEvents, e)
+	}
+	sort.Slice(sortedEvents, func(i int, j int) bool {
+		return sortedEvents[i].Date < sortedEvents[j].Date
 	})
-	return &Response{"", hashEvents, kennels}
+	return &Response{"", sortedEvents, kennels}
 }
 
 type HashEvent struct {

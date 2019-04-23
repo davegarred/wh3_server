@@ -7,16 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/davegarred/wh3/dto"
+	"log"
 	"time"
 )
 
 const (
-	kennelTable = "wh3_google_calendar"
-	eventTable = "wh3_kennel"
-	primaryKey  = "googleId"
-	dateIndex   = "eventDate"
+	eventTable      = "wh3_google_calendar"
+	adminEventTable = "wh3_admin_event"
+	kennelTable     = "wh3_kennel"
+	primaryKey      = "googleId"
+	dateIndex       = "eventDate"
 	calendarField   = "calendar"
-	payload     = "payload"
+	payload         = "payload"
 )
 
 func Get(key string) (*string, error) {
@@ -43,13 +45,13 @@ func Get(key string) (*string, error) {
 	return event, nil
 }
 
-func AllEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
+func AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 	svc, err := client()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	scanOutput, err := svc.Scan(eventsAfterToday())
+	scanOutput, err := svc.Scan(googleCalendarEventsAfterToday())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -72,6 +74,32 @@ func AllEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 	}
 
 	return wh3Events, hswtfEvents, nil
+}
+
+func AllAdminEvents() (map[string]*dto.HashEvent, error) {
+	svc, err := client()
+	if err != nil {
+		return nil, err
+	}
+
+	scanOutput, err := svc.Scan(adminEventsAfterToday())
+	if err != nil {
+		return nil, err
+	}
+
+	adminEvents := make(map[string]*dto.HashEvent)
+	for _, item := range scanOutput.Items {
+		adminEvent := &dto.HashEvent{}
+		googleId := item[primaryKey].S
+		serializedEvent := item[payload].S
+		err = json.Unmarshal([]byte(*serializedEvent), adminEvent)
+		if err != nil {
+			log.Printf("error deserializeing admin event with ID %s - %v", googleId, err)
+		} else {
+			adminEvents[adminEvent.GoogleId] = adminEvent
+		}
+	}
+	return adminEvents, nil
 }
 
 func AllKennels() ([]*dto.Kennel, error) {
@@ -99,7 +127,7 @@ func AllKennels() ([]*dto.Kennel, error) {
 	return result, nil
 }
 
-func eventsAfterToday() *dynamodb.ScanInput {
+func adminEventsAfterToday() *dynamodb.ScanInput {
 	start := time.Now()
 	return &dynamodb.ScanInput{
 		ExpressionAttributeNames: map[string]*string{
@@ -112,14 +140,31 @@ func eventsAfterToday() *dynamodb.ScanInput {
 		},
 		FilterExpression:     aws.String("#d >= :start"),
 		//ProjectionExpression: aws.String(payload),
-		TableName:            aws.String(kennelTable),
+		TableName:            aws.String(adminEventTable),
+	}
+}
+
+func googleCalendarEventsAfterToday() *dynamodb.ScanInput {
+	start := time.Now()
+	return &dynamodb.ScanInput{
+		ExpressionAttributeNames: map[string]*string{
+			"#d": aws.String(dateIndex),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":start": {
+				S: aws.String(start.Format("2006-01-02")),
+			},
+		},
+		FilterExpression: aws.String("#d >= :start"),
+		//ProjectionExpression: aws.String(payload),
+		TableName: aws.String(eventTable),
 	}
 }
 
 func allKennels() *dynamodb.ScanInput {
 	return &dynamodb.ScanInput{
 		ProjectionExpression: aws.String(payload),
-		TableName:            aws.String(eventTable),
+		TableName:            aws.String(kennelTable),
 	}
 }
 
@@ -147,7 +192,7 @@ func Put(calendar string, events []*dto.GoogleCalendar) error {
 				payload: &dynamodb.AttributeValue{
 					S: aws.String(string(ser)),
 				}},
-			TableName: aws.String(kennelTable),
+			TableName: aws.String(eventTable),
 		})
 		if err != nil {
 			return err

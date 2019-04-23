@@ -57,6 +57,6 @@ func verifyHare(t *testing.T, s string) {
 }
 
 func TestTmp(t *testing.T) {
-	val := "{\n  \"id\": \"SS_SHITSHOW\",\n  \"name\": \"South Sound Shitshow\",\n  \"hareraiserName\": \"\",\n  \"hareraiserEmail\": \"\",\n  \"badges\": [],\n  \"firstHash\": \"\",\n  \"founders\": \"\",\n  \"lineage\": \"\"\n}"
+	val := "{\"id\":\"161nk27qmed4qv6n3ork69gk55\",\"date\":\"2019-04-20\",\"dateTime\":\"\",\"summary\":\"wGASH (Renegade 4/20 Trail)\",\"location\":\"47.695676, -122.349244\",\"description\":\"Yearly renegade 4/20 trail. It's on a Saturday so we will actually start at the sacred time.\\u003cbr\\u003e\\u003cbr\\u003eStart Time: Arrive by 4pm. Goodness knows if we say 4:20 we will show up late.....Hares away by 5pm, hopefully....\\u003cbr\\u003e\\u003cbr\\u003eHash Cash: $10\\u003cbr\\u003e\\u003cbr\\u003eHares: Hickory Dickory Cock and anyone else who is interested. Message me if you want to help\\u003cbr\\u003e\\u003cbr\\u003eLocation: Casa de Hickory-TwerkinBondage\\u003cbr\\u003eGPS: 47.695676, -122.349244\\u003cbr\\u003e\\u003cbr\\u003eTrail Deets: Expect a short trail with snacks, a little bit of beer, and lots of ganja products.\\u003cbr\\u003e\\u003cbr\\u003eFB Event: \\u003ca href=\\\"https://www.facebook.com/events/640224796429547/\\\" target=\\\"_blank\\\" id=\\\"ow390\\\" __is_owner=\\\"true\\\"\\u003ehttps://www.facebook.com/events/640224796429547/\\u003c/a\\u003e\"}"
 	fmt.Println(val)
 }

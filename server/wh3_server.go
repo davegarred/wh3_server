@@ -9,7 +9,13 @@ import (
 )
 
 func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Response, error) {
-	wh3Events, hswtfEvents, err := persist.AllEvents()
+	wh3Events, hswtfEvents, err := persist.AllCalendarEvents()
+	if err != nil {
+		return nil, err
+	}
+	calendarEvents := dto.ConvertCalendarEvents(wh3Events, hswtfEvents)
+
+	adminEvents, err := persist.AllAdminEvents()
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +25,7 @@ func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Res
 		return nil, err
 	}
 
-	return dto.ConvertAndWrap(wh3Events, hswtfEvents, kennels), nil
+	return dto.ProcessAndWrap(calendarEvents, adminEvents, kennels), nil
 }
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func _TestHandleRequest(t *testing.T) {
+func TestHandleRequest(t *testing.T) {
 	_,err := HandleRequest(context.Background(), nil)
 	if err != nil {
 		panic(err)

@@ -15,7 +15,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	wh3Events, _,err := AllEvents()
+	wh3Events, _,err := AllCalendarEvents()
 	if err != nil {
 		panic(err)
 	}
