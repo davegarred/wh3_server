@@ -7,7 +7,7 @@ import (
 )
 
 func TestParseEventName(t *testing.T) {
-	expect(t, HAPPY_HOUR, "Seattle H3 Hashy Hour", "", "Seattle H3 Hashy Hour");
+	expect(t, HAPPY_HOUR, "Seattle Hashy Hour", "", "Seattle Hashy Hour");
 	expect(t, SEATTLE, "SH3 RDR 2016 Planning Meeting", "", "SH3 RDR 2016 Planning Meeting");
 	expect(t, SEATTLE, "Hashmas", "756", "SH3 #756 (Hashmas)");
 	expect(t, SEATTLE, "SH3", "", "SH3 #? (TBD)");

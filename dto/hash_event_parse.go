@@ -110,7 +110,7 @@ func stripUnknownEventNumber(summaryWithoutTitle string) string {
 
 func guessKennel(summary string) KennelId {
 	kennels := map[string]KennelId{
-		"Seattle H3 Hashy Hour":      HAPPY_HOUR,
+		"Seattle Hashy Hour":      HAPPY_HOUR,
 		"SH3":                        SEATTLE,
 		"SeaMon":                     SEAMON,
 		"NBH3":                       NO_BALLS,

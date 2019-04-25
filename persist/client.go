@@ -94,7 +94,7 @@ func AllAdminEvents() (map[string]*dto.HashEvent, error) {
 		serializedEvent := item[payload].S
 		err = json.Unmarshal([]byte(*serializedEvent), adminEvent)
 		if err != nil {
-			log.Printf("error deserializeing admin event with ID %s - %v", googleId, err)
+			log.Printf("error deserializing admin event with ID %s - %v", *googleId, err)
 		} else {
 			adminEvents[adminEvent.GoogleId] = adminEvent
 		}
@@ -156,7 +156,6 @@ func googleCalendarEventsAfterToday() *dynamodb.ScanInput {
 			},
 		},
 		FilterExpression: aws.String("#d >= :start"),
-		//ProjectionExpression: aws.String(payload),
 		TableName: aws.String(eventTable),
 	}
 }
@@ -174,22 +173,24 @@ func Put(calendar string, events []*dto.GoogleCalendar) error {
 		return err
 	}
 
+	trackingSet := make(map[string]bool)
 	for _, event := range events {
+		if trackingSet[event.Id] {
+			log.Printf("found duplicate events for ID: " + event.Id)
+		}
 		ser, _ := json.Marshal(event)
 		_, err := svc.PutItem(&dynamodb.PutItemInput{
-			ExpressionAttributeNames:  nil,
-			ExpressionAttributeValues: nil,
 			Item: map[string]*dynamodb.AttributeValue{
-				primaryKey: &dynamodb.AttributeValue{
+				primaryKey: {
 					S: aws.String(event.Id),
 				},
-				dateIndex: &dynamodb.AttributeValue{
+				dateIndex: {
 					S: aws.String(event.EventDate()),
 				},
-				calendarField: &dynamodb.AttributeValue{
+				calendarField: {
 					S: aws.String(calendar),
 				},
-				payload: &dynamodb.AttributeValue{
+				payload: {
 					S: aws.String(string(ser)),
 				}},
 			TableName: aws.String(eventTable),
