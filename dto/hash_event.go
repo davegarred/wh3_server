@@ -89,7 +89,13 @@ func ProcessAndWrap(calendarEvents map[string]*HashEvent, adminEvents map[string
 		sortedEvents = append(sortedEvents, e)
 	}
 	sort.Slice(sortedEvents, func(i int, j int) bool {
-		return sortedEvents[i].Date < sortedEvents[j].Date
+		if(sortedEvents[i].Date != sortedEvents[j].Date) {
+			return sortedEvents[i].Date < sortedEvents[j].Date
+		}
+		if(sortedEvents[i].DateTime != sortedEvents[j].DateTime) {
+			return sortedEvents[i].DateTime < sortedEvents[j].DateTime
+		}
+		return sortedEvents[i].EventName < sortedEvents[j].EventName
 	})
 	return &Response{"", sortedEvents, kennels}
 }
