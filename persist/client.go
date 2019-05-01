@@ -128,36 +128,38 @@ func AllKennels() ([]*dto.Kennel, error) {
 }
 
 func adminEventsAfterToday() *dynamodb.ScanInput {
-	start := time.Now()
 	return &dynamodb.ScanInput{
 		ExpressionAttributeNames: map[string]*string{
 			"#d": aws.String(dateIndex),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":start": {
-				S: aws.String(start.Format("2006-01-02")),
+				S: aws.String(today()),
 			},
 		},
-		FilterExpression:     aws.String("#d >= :start"),
+		FilterExpression: aws.String("#d >= :start"),
 		//ProjectionExpression: aws.String(payload),
-		TableName:            aws.String(adminEventTable),
+		TableName: aws.String(adminEventTable),
 	}
 }
 
 func googleCalendarEventsAfterToday() *dynamodb.ScanInput {
-	start := time.Now()
 	return &dynamodb.ScanInput{
 		ExpressionAttributeNames: map[string]*string{
 			"#d": aws.String(dateIndex),
 		},
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":start": {
-				S: aws.String(start.Format("2006-01-02")),
+				S: aws.String(today()),
 			},
 		},
 		FilterExpression: aws.String("#d >= :start"),
-		TableName: aws.String(eventTable),
+		TableName:        aws.String(eventTable),
 	}
+}
+
+func today() string {
+	return time.Now().UTC().Add(time.Duration(-7) * time.Hour).Format("2006-01-02")
 }
 
 func allKennels() *dynamodb.ScanInput {
