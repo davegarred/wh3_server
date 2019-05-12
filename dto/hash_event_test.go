@@ -6,24 +6,24 @@ import (
 "testing"
 )
 
-func TestParseEventName(t *testing.T) {
-	expect(t, HAPPY_HOUR, "Seattle Hashy Hour", "", "Seattle Hashy Hour");
-	expect(t, SEATTLE, "SH3 RDR 2016 Planning Meeting", "", "SH3 RDR 2016 Planning Meeting");
-	expect(t, SEATTLE, "Hashmas", "756", "SH3 #756 (Hashmas)");
-	expect(t, SEATTLE, "SH3", "", "SH3 #? (TBD)");
-	expect(t, PUGET_SOUND, "Christmas Run #35, with a touch of absinthe", "941", "PSH3 #941 (Christmas Run #35, with a touch of absinthe)");
-	expect(t, SEAMON, "SeaMon H3", "", "SeaMon H3 #? (TBD)");
-	expect(t, NO_BALLS, "NBH3", "", "NBH3 #? (TBD)");
-	expect(t, HSWTF, "3rd Anal Staph Infection run", "115", "HSWTFH3 #115 (3rd Anal Staph Infection run)");
-	expect(t, RENTON_HAPPY_HOUR, "South End H3 Happy Hour?", "", "South End H3 Happy Hour?");
-	expect(t, SOUTH_SOUND, "XXX-mas", "144", "SSH3 #144 (XXX-mas)");
-	expect(t, UNKNOWN, "H3 Founding Day - 1938", "", "H3 Founding Day - 1938")
+func TestParseEventName_wh3(t *testing.T) {
+	expectWh3Details(t, HAPPY_HOUR, "Seattle Hashy Hour", "", "Seattle Hashy Hour");
+	expectWh3Details(t, SEATTLE, "SH3 RDR 2016 Planning Meeting", "", "SH3 RDR 2016 Planning Meeting");
+	expectWh3Details(t, SEATTLE, "Hashmas", "756", "SH3 #756 (Hashmas)");
+	expectWh3Details(t, SEATTLE, "SH3", "", "SH3 #? (TBD)");
+	expectWh3Details(t, PUGET_SOUND, "Christmas Run #35, with a touch of absinthe", "941", "PSH3 #941 (Christmas Run #35, with a touch of absinthe)");
+	expectWh3Details(t, SEAMON, "SeaMon H3", "", "SeaMon H3 #? (TBD)");
+	expectWh3Details(t, NO_BALLS, "NBH3", "", "NBH3 #? (TBD)");
+	expectWh3Details(t, HSWTF, "3rd Anal Staph Infection run", "115", "HSWTFH3 #115 (3rd Anal Staph Infection run)");
+	expectWh3Details(t, RENTON_HAPPY_HOUR, "South End H3 Happy Hour?", "", "South End H3 Happy Hour?");
+	expectWh3Details(t, SOUTH_SOUND, "XXX-mas", "144", "SSH3 #144 (XXX-mas)");
+	expectWh3Details(t, UNKNOWN, "H3 Founding Day - 1938", "", "H3 Founding Day - 1938")
 }
 
-func expect(t *testing.T, expectedKennel KennelId, expectedName string, expectedRun string, calendarSummary string) {
+func expectWh3Details(t *testing.T, expectedKennel KennelId, expectedName string, expectedRun string, calendarSummary string) {
 	assert.Equal(t, guessKennel(calendarSummary), expectedKennel)
-	assert.Equal(t, parseEventName(calendarSummary), expectedName)
-	assert.Equal(t, guessEventNumber(calendarSummary), expectedRun)
+	assert.Equal(t, parseEventName_wh3(calendarSummary), expectedName)
+	assert.Equal(t, guessEventNumber_wh3(calendarSummary), expectedRun)
 }
 
 var (
@@ -53,7 +53,19 @@ func verifyHare(t *testing.T, s string) {
 	if hare == "" {
 		t.Error()
 	}
-	fmt.Println(hare)
+	//fmt.Println(hare)
+}
+
+func TestParseEventName_hswtf(t *testing.T) {
+	expectHswtfDetails(t, "HS!WTF?H3 - 204TH - Drinko De Mayo", "Drinko De Mayo", "204")
+	expectHswtfDetails(t, "HS!WTF?H3 - 205TH - Alzheimer’s Bday", "Alzheimers Bday", "205")
+	expectHswtfDetails(t, "HS!WTF?H3 - 206TH", "Holy Shit! WTF? H3", "206")
+}
+
+func expectHswtfDetails(t *testing.T, given, expectedName, expectedRun string) {
+	foundName,foundRun := parseEventName_hswtf(given)
+	assert.Equal(t, expectedName, foundName)
+	assert.Equal(t, expectedRun, foundRun)
 }
 
 func TestTmp(t *testing.T) {

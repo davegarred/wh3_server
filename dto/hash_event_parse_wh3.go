@@ -20,10 +20,11 @@ func ConvertGoogleCal(cal *GoogleCalendar) (*HashEvent, error) {
 		}
 		date = rfcTime.Format("2006-01-02")
 	}
-	eventName := parseEventName(cal.Summary);
+	eventName := parseEventName_wh3(cal.Summary);
 	kennel := guessKennel(cal.Summary);
-	eventNumber := guessEventNumber(cal.Summary)
+	eventNumber := guessEventNumber_wh3(cal.Summary)
 	hare := parseHare(cal.Summary)
+	description := strings.Replace(cal.Description, "’", "'", -1)
 
 	event := &HashEvent{
 		GoogleId:    cal.Id,
@@ -32,38 +33,7 @@ func ConvertGoogleCal(cal *GoogleCalendar) (*HashEvent, error) {
 		EventNumber: eventNumber,
 		Hare:        hare,
 		EventName:   eventName,
-		Description: cal.Description,
-		MapLink:     cal.EventLocation(),
-		Kennel:      kennel,
-	}
-
-	return event, nil
-}
-func ConvertGoogleCalForHSWTF(cal *GoogleCalendar) (*HashEvent, error) {
-	if cal.Date == "" && cal.DateTime == "" {
-		return nil, errors.New("no acceptable date found")
-	}
-	date := cal.Date
-	if date == "" {
-		rfcTime, err := time.Parse(time.RFC3339, cal.DateTime)
-		if err != nil {
-			return nil, errors.New("no acceptable date found")
-		}
-		date = rfcTime.Format("2006-01-02")
-	}
-	eventName := cal.Summary;
-	kennel := HSWTF;
-	eventNumber := ""
-	hare := ""
-
-	event := &HashEvent{
-		GoogleId:    cal.Id,
-		Date:        date,
-		DateTime:    cal.DateTime,
-		EventNumber: eventNumber,
-		Hare:        hare,
-		EventName:   eventName,
-		Description: cal.Description,
+		Description: description,
 		MapLink:     cal.EventLocation(),
 		Kennel:      kennel,
 	}
@@ -85,7 +55,7 @@ var (
 	hareRegex         = regexp.MustCompile(harePattern)
 )
 
-func parseEventName(summary string) string {
+func parseEventName_wh3(summary string) string {
 	kennel := guessKennel(summary)
 	if kennel != UNKNOWN {
 		//check for anniversary
@@ -134,7 +104,7 @@ func guessKennel(summary string) KennelId {
 	return UNKNOWN
 }
 
-func guessEventNumber(summary string) string {
+func guessEventNumber_wh3(summary string) string {
 	pos := strings.Index(summary, "#")
 	if pos > 0 {
 		substr := summary[pos+1:]
