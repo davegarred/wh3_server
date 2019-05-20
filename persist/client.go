@@ -45,35 +45,39 @@ func Get(key string) (*string, error) {
 	return event, nil
 }
 
-func AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
+func AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 	svc, err := client()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	scanOutput, err := svc.Scan(googleCalendarEventsAfterToday())
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	wh3Events := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
 	hswtfEvents := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
+	hamsterEvents := make([]*dto.GoogleCalendar, 0, len(scanOutput.Items))
 	for _, item := range scanOutput.Items {
 		calendar := item[calendarField].S
 		serEvent := item[payload].S
 		event := &dto.GoogleCalendar{}
 		err := json.Unmarshal([]byte(*serEvent), event)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		if "wh3" == *calendar {
 			wh3Events = append(wh3Events, event)
 		} else if "hswtf" == *calendar {
 			hswtfEvents = append(hswtfEvents, event)
+		} else if "hamster" == *calendar {
+			hamsterEvents = append(hamsterEvents, event)
 		}
+
 	}
 
-	return wh3Events, hswtfEvents, nil
+	return wh3Events, hswtfEvents, hamsterEvents, nil
 }
 
 func AllAdminEvents() (map[string]*dto.HashEvent, error) {

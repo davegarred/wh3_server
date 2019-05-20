@@ -22,7 +22,7 @@ func HandleRequest(_ context.Context, _ interface{}) (interface{}, error) {
 }
 
 func updateEvents() error {
-	wh3Events, hswtfEvents, err := pullWH3Events()
+	wh3Events, hswtfEvents, hamsterEvents, err := pullWH3Events()
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,18 @@ func updateEvents() error {
 	if err != nil {
 		return err
 	}
-	return persistEvents("hswtf", hswtfEvents)
+
+	err = persistEvents("hswtf", hswtfEvents)
+	if err != nil {
+		return err
+	}
+
+	err = persistEvents("hamster", hamsterEvents)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func formatGoogleId(event *calendar.Event) string {
@@ -51,20 +62,20 @@ func formatGoogleId(event *calendar.Event) string {
 	}
 	return event.Id;
 }
-func pullWH3Events() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
+func pullWH3Events() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 	dat, err := ioutil.ReadFile("wh3-calendar-cb8bb1a84750.json")
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	client, err := reader.NewCalendarReader(dat)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	wh3HashEvents, err := client.WH3Events()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	wh3CalendarEvents := make([]*dto.GoogleCalendar, 0, len(wh3HashEvents.Items))
@@ -83,7 +94,7 @@ func pullWH3Events() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 
 	hswtfHashEvents, err := client.HSWTFEvents()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	hswtfCalendarEvents := make([]*dto.GoogleCalendar, 0, len(hswtfHashEvents.Items))
@@ -98,11 +109,31 @@ func pullWH3Events() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
 			Description: hashEvent.Description,
 		})
 	}
-	return wh3CalendarEvents, hswtfCalendarEvents, err
+
+
+	hamsterHashEvents, err := client.HamsterEvents()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	hamsterCalendarEvents := make([]*dto.GoogleCalendar, 0, len(hamsterHashEvents.Items))
+	for _, hashEvent := range hamsterHashEvents.Items {
+		formattedId := formatGoogleId(hashEvent)
+		hamsterCalendarEvents = append(hamsterCalendarEvents, &dto.GoogleCalendar{
+			Id:          formattedId,
+			Date:        hashEvent.Start.Date,
+			DateTime:    hashEvent.Start.DateTime,
+			Summary:     hashEvent.Summary,
+			Location:    hashEvent.Location,
+			Description: hashEvent.Description,
+		})
+	}
+
+	return wh3CalendarEvents, hswtfCalendarEvents, hamsterCalendarEvents, err
 }
 
 func persistEvents(calendar string, events []*dto.GoogleCalendar) error {
-	log.Printf("found and persisting %d events", len(events))
+	log.Printf("found and persisting %d %s events", len(events), calendar)
 	return persist.Put(calendar, events)
 }
 

@@ -9,11 +9,11 @@ import (
 )
 
 func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Response, error) {
-	wh3Events, hswtfEvents, err := persist.AllCalendarEvents()
+	wh3Events, hswtfEvents, hamsterEvents, err := persist.AllCalendarEvents()
 	if err != nil {
 		return nil, err
 	}
-	calendarEvents := dto.ConvertCalendarEvents(wh3Events, hswtfEvents)
+	calendarEvents := dto.ConvertCalendarEvents(wh3Events, hswtfEvents, hamsterEvents)
 
 	adminEvents, err := persist.AllAdminEvents()
 	if err != nil {

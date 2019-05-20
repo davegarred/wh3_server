@@ -21,7 +21,6 @@ func ConvertGoogleCalForHSWTF(cal *GoogleCalendar) (*HashEvent, error) {
 	}
 	eventName,eventNumber := parseEventName_hswtf(cal.Summary);
 	description := strings.Replace(cal.Description,"’","'",-1)
-	kennel := HSWTF;
 	hare := ""
 
 	event := &HashEvent{
@@ -33,7 +32,7 @@ func ConvertGoogleCalForHSWTF(cal *GoogleCalendar) (*HashEvent, error) {
 		EventName:   eventName,
 		Description: description,
 		MapLink:     cal.EventLocation(),
-		Kennel:      kennel,
+		Kennel:      HSWTF,
 	}
 
 	return event, nil

@@ -69,6 +69,6 @@ func expectHswtfDetails(t *testing.T, given, expectedName, expectedRun string) {
 }
 
 func TestTmp(t *testing.T) {
-	val := "{\"id\":\"0q8349rbqa6oo9n93kirre9tns_20190427\",\"date\":\"2019-04-27\",\"dateTime\":\"\",\"summary\":\"SH3 #? (TBD)\",\"location\":\"TBD\",\"description\":\"Details still TBD.\\n\\nSeattle's main co-ed kennel that runs on the 2nd \\u0026 4th Saturday of the month.\\nTrails are usually 3-5 miles with multiple beer checks.\\n\\nHareline: http://wh3.org/Harelines/Seattle.htm\"}"
+	val := "{\"id\":\"0odi5geepodms3144rv27pr7hp_20190602\",\"date\":\"\",\"dateTime\":\"2019-06-02T12:00:00-07:00\",\"summary\":\"HS!WTF?H3 - 206TH\",\"location\":\"Bremerton, WA, USA\",\"description\":\"-WHERE?\\nTBD\\n\\n-WHEN?\\nSunday 6/2/19 @ 12:00 PM\\nHares away - 12:30 PMish\\n\\n-WHO?\\nManmaker\\n\\n-WHAT?\\nTBD\\n\\n-WHAT YOU NEED ON TRAIL: \\n$7\\nA vessel\\nShiggy Gear\\nID\\nNew shoes \\nDry bag\\nLow expectations\\nSacred fruits\\nVirgins (who run for free)\"}"
 	fmt.Println(val)
 }
