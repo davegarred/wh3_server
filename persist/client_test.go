@@ -6,16 +6,18 @@ import (
 	"testing"
 )
 
-func TestGet(t *testing.T) {
-	data,err := Get("0lifalmd3dh70cnibsg90ha2or")
+func _TestGet(t *testing.T) {
+	client := NewDynamoClient()
+	data,err := client.GetKennel("PUGET_SOUND")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(data)
 }
 
-func TestSearch(t *testing.T) {
-	wh3Events, _,err := AllCalendarEvents()
+func _TestSearch(t *testing.T) {
+	client := NewDynamoClient()
+	wh3Events, _, _,err := client.AllCalendarEvents()
 	if err != nil {
 		panic(err)
 	}
@@ -24,8 +26,9 @@ func TestSearch(t *testing.T) {
 	}
 }
 
-func TestPut(t *testing.T) {
-	err := Put("test", []*dto.GoogleCalendar{
+func _TestPut(t *testing.T) {
+	client := NewDynamoClient()
+	err := client.Put("test", []*dto.GoogleCalendar{
 		{
 			Id:          "test-id",
 			Date:        "2019-04-05",

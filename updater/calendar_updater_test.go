@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
+	"github.com/davegarred/wh3/persist"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/calendar/v3"
 	"testing"
 )
 
 func TestHandleRequest(t *testing.T) {
-	_, err := HandleRequest(context.Background(), nil)
+	handler := &UpdateHandler{persist.NewDynamoClient()}
+	_, err := handler.HandleRequest(context.Background(), nil)
 	if err != nil {
 		panic(err)
 	}

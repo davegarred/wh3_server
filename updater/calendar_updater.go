@@ -13,31 +13,35 @@ import (
 	"time"
 )
 
-func HandleRequest(_ context.Context, _ interface{}) (interface{}, error) {
-	err := updateEvents()
+type UpdateHandler struct {
+	db persist.Persist
+}
+
+func (h *UpdateHandler) HandleRequest(_ context.Context, _ interface{}) (interface{}, error) {
+	err := h.updateEvents()
 	if err != nil {
 		log.Printf("Error encountered %v", err)
 	}
 	return nil, err
 }
 
-func updateEvents() error {
+func (h *UpdateHandler) updateEvents() error {
 	wh3Events, hswtfEvents, hamsterEvents, err := pullWH3Events()
 	if err != nil {
 		return err
 	}
 
-	err = persistEvents("wh3", wh3Events)
+	err = h.persistEvents("wh3", wh3Events)
 	if err != nil {
 		return err
 	}
 
-	err = persistEvents("hswtf", hswtfEvents)
+	err = h.persistEvents("hswtf", hswtfEvents)
 	if err != nil {
 		return err
 	}
 
-	err = persistEvents("hamster", hamsterEvents)
+	err = h.persistEvents("hamster", hamsterEvents)
 	if err != nil {
 		return err
 	}
@@ -132,11 +136,12 @@ func pullWH3Events() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.Googl
 	return wh3CalendarEvents, hswtfCalendarEvents, hamsterCalendarEvents, err
 }
 
-func persistEvents(calendar string, events []*dto.GoogleCalendar) error {
+func (h *UpdateHandler) persistEvents(calendar string, events []*dto.GoogleCalendar) error {
 	log.Printf("found and persisting %d %s events", len(events), calendar)
-	return persist.Put(calendar, events)
+	return h.db.Put(calendar, events)
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	handler := &UpdateHandler{persist.NewDynamoClient()}
+	lambda.Start(handler)
 }

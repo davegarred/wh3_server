@@ -8,19 +8,22 @@ import (
 	"github.com/davegarred/wh3/persist"
 )
 
-func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Response, error) {
-	wh3Events, hswtfEvents, hamsterEvents, err := persist.AllCalendarEvents()
+type RequestHandler struct {
+	db persist.Persist
+}
+func (h *RequestHandler) HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Response, error) {
+	wh3Events, hswtfEvents, hamsterEvents, err := h.db.AllCalendarEvents()
 	if err != nil {
 		return nil, err
 	}
 	calendarEvents := dto.ConvertCalendarEvents(wh3Events, hswtfEvents, hamsterEvents)
 
-	adminEvents, err := persist.AllAdminEvents()
+	adminEvents, err := h.db.AllAdminEvents()
 	if err != nil {
 		return nil, err
 	}
 
-	kennels, err := persist.AllKennels()
+	kennels, err := h.db.AllKennels()
 	if err != nil {
 		return nil, err
 	}
@@ -29,5 +32,6 @@ func HandleRequest(_ context.Context, _ events.APIGatewayProxyRequest) (*dto.Res
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	handler := &RequestHandler{persist.NewDynamoClient()}
+	lambda.Start(handler)
 }

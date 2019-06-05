@@ -12,7 +12,7 @@ const (
 	seah3Calendar = "8d65om7lrdq538ksqednh2n648@group.calendar.google.com";
 )
 
-func TestCal(t *testing.T) {
+func _TestCal(t *testing.T) {
 	dat, err := ioutil.ReadFile("../wh3-calendar-cb8bb1a84750.json")
 	if err != nil {
 		panic(err)

@@ -21,15 +21,31 @@ const (
 	payload         = "payload"
 )
 
-func Get(key string) (*string, error) {
+var DefaultDB Persist = NewDynamoClient()
+
+type Persist interface {
+	Put(calendar string, events []*dto.GoogleCalendar) error
+	AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.GoogleCalendar, error)
+	AllAdminEvents() (map[string]*dto.HashEvent, error)
+	AllKennels() ([]*dto.Kennel, error)
+}
+
+type DynamoClient struct {
+	svc *dynamodb.DynamoDB
+}
+
+func NewDynamoClient() *DynamoClient{
 	svc, err := client()
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
+	return &DynamoClient{svc}
+}
 
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
+func (c *DynamoClient) GetKennel(key string) (*string, error) {
+	result, err := c.svc.GetItem(&dynamodb.GetItemInput{
 		Key: map[string]*dynamodb.AttributeValue{
-			"id": &dynamodb.AttributeValue{
+			"kennel_id": &dynamodb.AttributeValue{
 				S: aws.String(key),
 			},
 		},
@@ -45,13 +61,8 @@ func Get(key string) (*string, error) {
 	return event, nil
 }
 
-func AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
-	svc, err := client()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	scanOutput, err := svc.Scan(googleCalendarEventsAfterToday())
+func (c *DynamoClient) AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.GoogleCalendar, error) {
+	scanOutput, err := c.svc.Scan(googleCalendarEventsAfterToday())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -80,13 +91,8 @@ func AllCalendarEvents() ([]*dto.GoogleCalendar, []*dto.GoogleCalendar, []*dto.G
 	return wh3Events, hswtfEvents, hamsterEvents, nil
 }
 
-func AllAdminEvents() (map[string]*dto.HashEvent, error) {
-	svc, err := client()
-	if err != nil {
-		return nil, err
-	}
-
-	scanOutput, err := svc.Scan(adminEventsAfterToday())
+func (c *DynamoClient) AllAdminEvents() (map[string]*dto.HashEvent, error) {
+	scanOutput, err := c.svc.Scan(adminEventsAfterToday())
 	if err != nil {
 		return nil, err
 	}
@@ -106,13 +112,8 @@ func AllAdminEvents() (map[string]*dto.HashEvent, error) {
 	return adminEvents, nil
 }
 
-func AllKennels() ([]*dto.Kennel, error) {
-	svc, err := client()
-	if err != nil {
-		return nil, err
-	}
-
-	scanOutput, err := svc.Scan(allKennels())
+func (c *DynamoClient) AllKennels() ([]*dto.Kennel, error) {
+	scanOutput, err := c.svc.Scan(allKennels())
 	if err != nil {
 		return nil, err
 	}
@@ -173,19 +174,14 @@ func allKennels() *dynamodb.ScanInput {
 	}
 }
 
-func Put(calendar string, events []*dto.GoogleCalendar) error {
-	svc, err := client()
-	if err != nil {
-		return err
-	}
-
+func (c *DynamoClient) Put(calendar string, events []*dto.GoogleCalendar) error {
 	trackingSet := make(map[string]bool)
 	for _, event := range events {
 		if trackingSet[event.Id] {
 			log.Printf("found duplicate events for ID: " + event.Id)
 		}
 		ser, _ := json.Marshal(event)
-		_, err := svc.PutItem(&dynamodb.PutItemInput{
+		_, err := c.svc.PutItem(&dynamodb.PutItemInput{
 			Item: map[string]*dynamodb.AttributeValue{
 				primaryKey: {
 					S: aws.String(event.Id),

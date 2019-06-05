@@ -4,5 +4,6 @@
 /server/server.zip
 /updater/wh3_updater
 /updater/wh3_updater.zip
+.coverage.out
 
 /updater/wh3-calendar-cb8bb1a84750.json

@@ -17,7 +17,7 @@ type CalendarReader struct {
 }
 
 func NewCalendarReader(configFile []byte) (*CalendarReader, error){
-	config, err :=google.JWTConfigFromJSON(configFile, calendar.CalendarReadonlyScope)
+	config, err := google.JWTConfigFromJSON(configFile, calendar.CalendarReadonlyScope)
 	if err != nil {
 		return nil, err
 	}
