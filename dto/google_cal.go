@@ -20,6 +20,8 @@ func (c *GoogleCalendar) EventLocation() string {
 	}
 	return "https://maps.google.com/maps?q=" + url.PathEscape(c.Location)
 }
+
+
 func (c *GoogleCalendar) EventDate() string {
 	if c.Date != "" {
 		return c.Date

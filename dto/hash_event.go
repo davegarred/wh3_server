@@ -65,7 +65,26 @@ func ConvertCalendarEvents(wh3Events []*GoogleCalendar, hswtfEvents []*GoogleCal
 	return hashEventMap
 }
 
-func ProcessAndWrap(calendarEvents map[string]*HashEvent, adminEvents map[string]*HashEvent, kennels []*Kennel) *Response {
+func ProcessAndWrap(calendarEvents, adminEvents map[string]*HashEvent, kennels []*Kennel) *Response {
+	applyAdminEvents(adminEvents, calendarEvents)
+
+	sortedEvents := make([]*HashEvent, 0, len(calendarEvents))
+	for _, e := range calendarEvents {
+		sortedEvents = append(sortedEvents, e)
+	}
+	sort.Slice(sortedEvents, func(i int, j int) bool {
+		if (sortedEvents[i].Date != sortedEvents[j].Date) {
+			return sortedEvents[i].Date < sortedEvents[j].Date
+		}
+		if (sortedEvents[i].DateTime != sortedEvents[j].DateTime) {
+			return sortedEvents[i].DateTime < sortedEvents[j].DateTime
+		}
+		return sortedEvents[i].EventName < sortedEvents[j].EventName
+	})
+	return &Response{"", sortedEvents, kennels}
+}
+
+func applyAdminEvents(adminEvents, calendarEvents map[string]*HashEvent) {
 	for _, e := range adminEvents {
 		event := calendarEvents[e.GoogleId]
 		if event == nil {
@@ -94,21 +113,6 @@ func ProcessAndWrap(calendarEvents map[string]*HashEvent, adminEvents map[string
 		}
 		calendarEvents[event.GoogleId] = event
 	}
-
-	sortedEvents := make([]*HashEvent, 0, len(calendarEvents))
-	for _, e := range calendarEvents {
-		sortedEvents = append(sortedEvents, e)
-	}
-	sort.Slice(sortedEvents, func(i int, j int) bool {
-		if (sortedEvents[i].Date != sortedEvents[j].Date) {
-			return sortedEvents[i].Date < sortedEvents[j].Date
-		}
-		if (sortedEvents[i].DateTime != sortedEvents[j].DateTime) {
-			return sortedEvents[i].DateTime < sortedEvents[j].DateTime
-		}
-		return sortedEvents[i].EventName < sortedEvents[j].EventName
-	})
-	return &Response{"", sortedEvents, kennels}
 }
 
 type HashEvent struct {
